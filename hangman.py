@@ -60,6 +60,9 @@ HANGMANPICS = ['''
       |
 =========''']
 
+
+
+
 def readWordList() :
 	file = open('test.txt', 'r')
 	words = file.read().split()
@@ -124,8 +127,16 @@ def checkWrongAnswer(missedLetters, secretWord):
     if len(missedLetters) == len(HANGMANPICS) - 1:
         return True
     return False
-            
+
+def checkHighScore(score, highscore) :
+    if(len(highscore) == 0) :
+        file = open("record.txt", 'w')
+        file.write(str(score))
+    if score>int(highscore) :
+        file = open("record.txt", 'w')
+        file.write(str(score))
 def main():
+
     """Main application entry point."""
     print('H A N G P E O P L E')
     missedLetters = ''
@@ -133,15 +144,22 @@ def main():
     gameSucceeded = False
     gameFailed = False
     secretWord = getRandomWord(readWordList())
+    file = open("record.txt", 'r')
+    highscore = file.read()
+    score = 0
 
     while True:
-        displayBoard(HANGMANPICS, missedLetters, correctLetters, secretWord)
 
+        displayBoard(HANGMANPICS, missedLetters, correctLetters, secretWord)
+        print('HighScore : ' + str(highscore))
+        print('YourScore : ' + str(score))
         if gameSucceeded or gameFailed:
             if gameSucceeded:
                 print('Yes! The secret word is "' + secretWord + '"! You have won!')
+                score += 1
             else:
                 print('You have run out of guesses!\nAfter ' + str(len(missedLetters)) + ' missed guesses and ' + str(len(correctLetters)) + ' correct guesses, the word was "' + secretWord + '"')
+                score = 0
 
             # Ask the player if they want to play again (but only if the game is done).
             if playAgain():
@@ -151,7 +169,8 @@ def main():
                 gameFailed = False
                 secretWord = getRandomWord(readWordList())
                 continue 
-            else: 
+            else:
+                checkHighScore(score, highscore)
                 break
 
         # Let the player type in a letter.
@@ -162,7 +181,7 @@ def main():
         else:
             missedLetters = missedLetters + guess
             gameFailed = checkWrongAnswer(missedLetters, secretWord)
-
+    file.close()
 
 if __name__ == "__main__":
     main()
